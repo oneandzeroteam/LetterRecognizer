@@ -9,9 +9,9 @@ class FTP_Parameter:
         self.ftp_user = 'soyung'
         self.ftp_pwd = ''
         self.ftp_homepath = '/My_Passport/Download2/workspace/data/CarlicenseProject'
+        self.ftp_uploadlocaldir = 'data'
         self.ftp_downloadlocaldir = 'data'
         self.ftp_targetpath = 'number'
-        # self.ftp_uploadlocaldir = 'data/test'
 
     def set_ftp_targetpath(self,ftp_targetpath):
         self.ftp_targetpath = ftp_targetpath
