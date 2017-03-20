@@ -1,0 +1,6 @@
+[submodule "Tensorflow_DataConverter"]
+	path = Tensorflow_DataConverter
+	url = https://github.com/pjo901018/Tensorflow_DataConverter.git
+[submodule "FTP_Manager"]
+	path = FTP_Manager
+	url = https://github.com/pjo901018/FTP_Manager.git
