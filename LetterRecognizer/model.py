@@ -16,10 +16,11 @@ class Model:
         self.sess = tf.Session()
         self.placebundle = placeholder_inputs(self.batch_size)
         self.load_graph()
-        self.init_saver()
+        #self.load_summary()
 
-        init = tf.initialize_all_variables()
-        self.sess.run(init)
+        initiate = tf.global_variables_initializer()
+        self.sess.run(initiate)
+        self.init_saver()
 
     def load_data(self, train_data_set, test_data_set):
         self.train_set = train_data_set
@@ -32,9 +33,28 @@ class Model:
         self.train_op = training(self.loss, HYPARMS.learning_rate)
         self.eval_correct = evaluation(self.logits, self.placebundle)
 
+    def load_summary(self):
+        self.summary = tf.summary.merge_all()
+        self.summary_writer = tf.summary.FileWriter(HYPARMS.log_dir, self.sess.graph)
+
+    def update_summary(self, feed_dict):
+        summary_str = self.sess.run(self.summary, feed_dict=feed_dict)
+        self.summary_writer.add_summary(summary_str, self.step)
+        self.summary_writer.flush()
+
     def init_saver(self):
         self.checkpoint_file = os.path.join(HYPARMS.ckpt_dir, HYPARMS.ckpt_name)
-        self.saver = tf.train.Saver()
+        saver_map = {
+            "w_conv1": self.placebundle.W.W_conv1,
+            "w_conv2": self.placebundle.W.W_conv2,
+            "w_fc1": self.placebundle.W.W_fc1,
+            "w_fc2": self.placebundle.W.W_fc2,
+            "b_conv1": self.placebundle.B.W_conv1,
+            "b_conv2": self.placebundle.B.W_conv2,
+            "b_fc1": self.placebundle.B.W_fc1,
+            "b_fc2": self.placebundle.B.W_fc2,
+                     }
+        self.saver = tf.train.Saver(saver_map)
         if not tf.gfile.Exists(HYPARMS.ckpt_dir):
             tf.gfile.MakeDirs(HYPARMS.ckpt_dir)
 
@@ -50,8 +70,6 @@ class Model:
             print("No checkpoint file found")
 
     def train(self):
-        init = tf.initialize_all_variables()
-        self.sess.run(init)
         start_time = time.time()
         for step in range(HYPARMS.max_steps):
             step_start_time = time.time()
@@ -70,13 +88,12 @@ class Model:
                                      feed_dict=feed_dict)
 
             step_duration = time.time() - step_start_time
-            if step % 100 == 0:
+            if step % int(HYPARMS.max_steps/50) == 0:
                 # Print status to stdout.
                 print('Step %d: loss = %.2f (%.3f sec)' % (step, loss_value, step_duration))
                 # Update the events file.
-                # summary_str = sess.run(summary, feed_dict=feed_dict)
-                # summary_writer.add_summary(summary_str, step)
-                # summary_writer.flush()
+                self.step = step
+                #self.update_summary(feed_dict)
 
             # Save a checkpoint
             # and evaluate the model periodically.
