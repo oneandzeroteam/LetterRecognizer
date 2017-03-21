@@ -105,8 +105,32 @@ class Model:
         self.save_saver()
 
 
+class RecogModel(Model):
+    def __init__(self):
+        self.batch_size = 1
+        self.init()
+        self.restore_saver()
 
-#     def predict(self, input):
-#         with self.sess.as_default():
-#             return self.classified.eval(feed_dict = {self.placebundle.x: input,
-#                                                     self.placebundle.keep_prob: 1})
+    def load_graph(self):
+        self.placebundle = placeholder_inputs(self.batch_size)
+        self.logits = graph_model(self.placebundle)
+        self.sftmax = tf.nn.softmax(self.logits)
+        self.classified = tf.argmax(self.sftmax, 1)
+
+    def init(self):
+        super().init()
+
+    def restore_saver(self):
+        super().restore_saver()
+
+    def init_saver(self):
+        super().init_saver()
+
+    def save_saver(self):
+        super().save_saver()
+
+    def predict(self, input):
+        input = input.reshape([1,input.shape[0],input.shape[1]])
+        with self.sess.as_default():
+            return self.classified.eval(feed_dict = {self.placebundle.x: input,
+                                                    self.placebundle.keep_prob: 1})
