@@ -42,3 +42,26 @@ class Model:
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
         print(sess.run(accuracy, feed_dict={x: self.test_set.images,
                                             y_: self.test_set.labels}))
+
+
+        # Predict
+        from Tensorflow_DataConverter.load.dir_loader import load_allpath
+        paths = load_allpath('data/sample/')
+        for path in paths:
+            from Tensorflow_DataConverter.load.img_loader import load_image
+            image = load_image(path)
+            from Tensorflow_DataConverter.process.normalizer_pillow import normalize_image
+            image = normalize_image(image)
+            from Tensorflow_DataConverter.load.converter_img import convert_image_to_numpy
+            image = convert_image_to_numpy(image)
+
+            print(image)
+            pred = tf.argmax(y, 1)
+            import numpy as np
+
+            from Tensorflow_DataConverter.visualize.visualizer_numpy import show_numpy_image
+            import matplotlib
+            predict = sess.run(pred, feed_dict={x: image.reshape([-1, 48, 28]),
+                                      y_: np.zeros([1,11])})
+            show_numpy_image(image, predict)
+            matplotlib.pyplot.show()
